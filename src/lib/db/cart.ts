@@ -1,11 +1,14 @@
 import prisma from "@/lib/db/prisma";
 import {cookies} from "next/headers";
-import {Cart, Prisma} from "@prisma/client";
+import {Prisma} from "@prisma/client";
 
 export type CartWithProducts = Prisma.CartGetPayload<{
     include: { items: { include: { product: true } } }
 }>
 
+export type CartItemWithProduct = Prisma.CartItemGetPayload<{
+    include: { product: true },
+}>
 export type ShoppingCart = CartWithProducts & {
     size: number,
     subtotal: number,
@@ -28,7 +31,7 @@ export async function getCart(): Promise<ShoppingCart | null> {
     }
 }
 
-export async function createcCart(): Promise<ShoppingCart> {
+export async function createCart(): Promise<ShoppingCart> {
     const newCart = await prisma.cart.create({
         data: {}
     })
