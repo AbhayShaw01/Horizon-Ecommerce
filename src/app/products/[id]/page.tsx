@@ -1,4 +1,4 @@
-import prisma from "@/lib/db/prisma";
+import {prisma} from "@/lib/db/prisma";
 import {notFound} from "next/navigation";
 import Image from "next/image";
 import PriceTag from "@/components/PriceTag";

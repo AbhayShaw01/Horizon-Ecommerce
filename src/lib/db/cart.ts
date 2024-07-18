@@ -1,4 +1,4 @@
-import prisma from "@/lib/db/prisma";
+import {prisma} from "@/lib/db/prisma";
 import {cookies} from "next/headers";
 import {Cart, CartItem, Prisma} from "@prisma/client";
 import {authOptions} from "@/app/api/auth/[...nextauth]/route";
@@ -69,37 +69,44 @@ export async function createCart(): Promise<ShoppingCart> {
 }
 
 
-
-export async function mergeAnonymousCartIntoUserCart(userId:string) {
+export async function mergeAnonymousCartIntoUserCart(userId: string) {
     const localCartId = cookies().get("localCartId")?.value;
 
     const localCart = localCartId
         ? await prisma.cart.findUnique({
-            where: { id: localCartId },
-            include: { items: true },
+            where: {id: localCartId},
+            include: {items: true},
         })
         : null;
 
     if (!localCart) return;
 
     const userCart = await prisma.cart.findFirst({
-        where: { userId },
-        include: { items: true },
+        where: {userId},
+        include: {items: true},
     });
 
     await prisma.$transaction(async (tx) => {
         if (userCart) {
             const mergedCartItems = mergeCartItems(localCart.items, userCart.items);
             await tx.cartItem.deleteMany({
-                where: { cartId: userCart.id },
+                where: {cartId: userCart.id},
             });
-            await tx.cartItem.createMany({
-                data: mergedCartItems.map((item) => ({
-                    cartId: userCart.id,
-                    productId: item.productId,
-                    quantity: item.quantity,
-                })),
-            });
+
+            await tx.cart.update({
+                where: {id: userCart.id},
+                data: {
+                    items: {
+                        createMany: {
+                            data: mergedCartItems.map((item) => ({
+                                productId: item.productId,
+                                quantity: item.quantity,
+                            })),
+                        }
+                    }
+                }
+            })
+
         } else {
             await tx.cart.create({
                 data: {
@@ -117,30 +124,12 @@ export async function mergeAnonymousCartIntoUserCart(userId:string) {
         }
 
         await tx.cart.delete({
-            where: { id: localCartId },
+            where: {id: localCartId},
         });
 
         cookies().set("localCartId", "");
     });
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 function mergeCartItems(...cartItems: CartItem[][]) {
