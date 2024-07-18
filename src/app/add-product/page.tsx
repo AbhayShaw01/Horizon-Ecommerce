@@ -22,9 +22,12 @@ async function addProduct(formData: FormData) {
     if (!name || !description || !imageUrl || !price) {
         throw Error("missing required fields");
     }
+
+
     await prisma.product.create({
         data: {name, description, imageUrl, price},
     });
+
     redirect("/");
 }
 
