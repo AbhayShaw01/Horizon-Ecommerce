@@ -5,7 +5,7 @@ import {getServerSession} from "next-auth";
 import {authOptions} from "@/app/api/auth/[...nextauth]/route";
 
 export const metadata = {
-    title: "Add Product - Shopping Shop",
+    title: "Add Product - Horizon",
 }
 
 

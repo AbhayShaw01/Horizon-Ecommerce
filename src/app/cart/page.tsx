@@ -4,7 +4,7 @@ import {setProductQuantity} from "@/app/cart/actions";
 import {formatPrice} from "@/lib/format";
 
 export const metadata ={
-    title:"Your Cart - Shopping Shop"
+    title:"Your Cart - Horizon"
 }
 
 export default async function CartPage() {
